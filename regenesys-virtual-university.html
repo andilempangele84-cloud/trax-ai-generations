@@ -22,11 +22,11 @@ body{margin:0;overflow:hidden;background:#9cc8ee;font-family:system-ui,sans-seri
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-const R=new THREE.WebGLRenderer({antialias:true});R.setSize(innerWidth,innerHeight);R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;document.body.prepend(R.domElement);
+const R=new THREE.WebGLRenderer({antialias:true});R.setSize(innerWidth,innerHeight);R.setPixelRatio(Math.min(devicePixelRatio,1.5));R.shadowMap.enabled=true;document.body.prepend(R.domElement);
 const S=new THREE.Scene();S.background=new THREE.Color(0x6fb6ff);
 const C=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,400);C.position.set(46,52,62);
 const O=new OrbitControls(C,R.domElement);O.enableDamping=true;O.maxPolarAngle=1.45;O.minDistance=6;O.maxDistance=140;
-S.add(new THREE.HemisphereLight(0xfff6e0,0x557744,1.15));const L=new THREE.DirectionalLight(0xffd59a,2.0);L.position.set(-70,55,-40);L.castShadow=true;L.shadow.mapSize.set(2048,2048);Object.assign(L.shadow.camera,{left:-60,right:60,top:60,bottom:-60,far:200});S.add(L);
+S.add(new THREE.HemisphereLight(0xfff6e0,0x557744,1.15));const L=new THREE.DirectionalLight(0xffd59a,2.0);L.position.set(-70,55,-40);L.castShadow=true;L.shadow.mapSize.set(1024,1024);Object.assign(L.shadow.camera,{left:-60,right:60,top:60,bottom:-60,far:200});S.add(L);
 const mc={};const M=(c,e=0,r=.6)=>{const k=c+'_'+e+'_'+r;return mc[k]||(mc[k]=new THREE.MeshStandardMaterial({color:c,emissive:e?c:0,emissiveIntensity:e,roughness:r,metalness:.1}))};
 const mat=m=>typeof m=='number'?M(m):m;
 const box=(w,h,d,m,x,y,z,p=S)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(m));o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;p.add(o);return o};
@@ -37,7 +37,7 @@ const grd=new THREE.Mesh(new THREE.PlaneGeometry(200,200),M(0x5d9b4a,0,.95));grd
 box(100,.1,100,0xd9d4c7,0,.05,4);
 box(200,.12,8,0x333840,0,.06,-52);for(let i=-90;i<95;i+=8)box(3,.02,.3,0xffffff,i,.13,-52);
 const rd=label('4 Pybus Road, Sandton','Regenesys Campus','#c8102e',10);rd.position.set(0,3,-48);S.add(rd);
-const sky=[0x8aa0b8,0x6f86a0,0xa3b5c8,0x5b6f88];for(let i=0;i<24;i++){const h=10+Math.random()*32;box(6+Math.random()*4,h,6,sky[i%4],-84+i*7.3,h/2,-66-Math.random()*8)}
+const sky=[0x8aa0b8,0x6f86a0,0xa3b5c8,0x5b6f88];for(let i=0;i<12;i++){const h=10+Math.random()*32;box(6+Math.random()*4,h,6,sky[i%4],-84+i*14.6,h/2,-66-Math.random()*8)}
 for(let i=0;i<30;i++){const a=i/30*Math.PI*2,r=58+Math.random()*6;if(Math.sin(a)<-.6)continue;const x=Math.cos(a)*r,z=Math.sin(a)*r+4;cyl(.3,.4,2.4,0x6b4423,x,1.2,z);sph(1.6,0x2f7d32,x,3.2,z)}
 const ZS=13;const zones={};
 function zone(key,name,sub,x,z,floor,wall=0xf4f1ea){const g=new THREE.Group();g.position.set(x,0,z);S.add(g);box(ZS,.2,ZS,floor,0,.15,0,g);box(ZS,3.2,.3,wall,0,1.7,-ZS/2,g);box(.3,3.2,ZS*.55,wall,-ZS/2,1.7,-ZS*.225,g);box(.3,3.2,ZS*.55,wall,ZS/2,1.7,-ZS*.225,g);box(ZS,.25,.32,0xc8102e,0,3.35,-ZS/2,g);const l=label(name,sub);l.position.set(0,5.2,-ZS/2);g.add(l);zones[key]={key,g,x,z,name,seats:[],spots:[]};return zones[key]}
@@ -251,7 +251,7 @@ const cols=[0xc8102e,0x1d3a7a,0xffd166,0x2ecc71,0xffffff,0x111111,0xff7f11,0x8e4
 const car=c=>{const g=new THREE.Group();S.add(g);box(1.8,.6,3.6,c,0,.6,0,g);box(1.5,.55,1.9,c,0,1.15,-.2,g);box(1.52,.45,1.7,0x9fd3ff,0,1.15,-.2,g);
  [[-.9,1.1],[.9,1.1],[-.9,-1.1],[.9,-1.1]].forEach(([x,z])=>{cyl(.35,.35,.25,0x111111,x,.35,z,g,10).rotation.z=Math.PI/2});
  [-.6,.6].forEach(x=>{sph(.14,M(0xfff6c8,2),x,.65,1.82,g);sph(.12,M(0xff0000,2),x,.65,-1.82,g)});return g};
-for(let i=0;i<22;i++){const d=i%2?1:-1;PW.cars.push({g:car(cols[i%10]),s:Math.random()*per,v:(6+Math.random()*5)*d,lane:d>0?-1.4:1.4})}
+for(let i=0;i<10;i++){const d=i%2?1:-1;PW.cars.push({g:car(cols[i%10]),s:Math.random()*per,v:(6+Math.random()*5)*d,lane:d>0?-1.4:1.4})}
 for(let i=0;i<3;i++)PW.cars.push({g:car(0xffd166),shuttle:true,ph:i/3});
 })();
 (function(){
@@ -376,9 +376,9 @@ for(let bz=Z0;bz<Z1;bz+=BS){const sub=new THREE.Vector3(-104,0,bz+BS/2);box(3,2,
 const BEAC=[];
 for(let bx=X0;bx>X1;bx-=BS)for(let bz=Z0;bz<Z1;bz+=BS){const cx=bx-BS/2,cz=bz+BS/2,bi=nB;const downtown=Math.hypot(cx+180,cz)<45;
  if(Math.abs(cx+182)<5&&Math.abs(cz-2)<5){for(let i=0;i<10;i++){const x=cx+(Math.random()-.5)*16,z=cz+(Math.random()-.5)*16;cyl(.15,.2,1.6,0x6b4a2b,x,.8,z,CG,6);sph(1+Math.random()*.4,0x3f8f2a,x,2.2,z,CG)}continue}
- const lots=downtown?[[-4.5,-4.5],[4.5,4.5]]:[[-5,-5],[5,5]];
+ const lots=downtown?[[0,0]]:[[0,0]];
  const sub=SUBS[Math.round((bz-Z0)/BS)];
- lots.forEach(([ox,oz],li)=>{if(!downtown&&Math.random()<.25)return;
+ lots.forEach(([ox,oz],li)=>{if(!downtown&&Math.random()<.5)return;
   const w=downtown?7+Math.random():4+Math.random()*1.2,d=downtown?7+Math.random():4+Math.random()*1.2,h=downtown?18+Math.random()*30:4+Math.floor(Math.random()*4)*3;
   const g=new THREE.Group();g.position.set(cx+ox,0,cz+oz);CG.add(g);
   const fm=FM[(bi+li)%FM.length];const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[fm,fm,M(0x333333),M(0x333333),fm,fm]);b.position.y=h/2;g.add(b);
@@ -391,7 +391,7 @@ const cl=label('CityDPC District',nB+' LOD2 buildings - all powered','#2a78d6',1
 const cc=[0xc8102e,0x1d3a7a,0xffd166,0x2ecc71,0xffffff,0x111111,0xff7f11,0x00bcd4];const CC=[];
 const mkCar=c=>{const g=new THREE.Group();CG.add(g);box(1.8,.6,3.6,c,0,.6,0,g);box(1.5,.55,1.9,0x9fd3ff,0,1.15,-.2,g);[-.6,.6].forEach(x=>{sph(.14,M(0xfff6c8,2),x,.65,1.82,g);sph(.12,M(0xff0000,2),x,.65,-1.82,g)});return g};
 const streetsX=[];for(let x=X0;x>=X1;x-=BS)streetsX.push(x);const streetsZ=[];for(let z=Z0;z<=Z1;z+=BS)streetsZ.push(z);
-for(let i=0;i<20;i++){const alongX=i%2==0,d=Math.random()<.5?1:-1;CC.push({g:mkCar(cc[i%8]),alongX,d,line:alongX?streetsZ[i%streetsZ.length]:streetsX[i%streetsX.length],s:Math.random(),v:(.04+Math.random()*.04)})}
+for(let i=0;i<8;i++){const alongX=i%2==0,d=Math.random()<.5?1:-1;CC.push({g:mkCar(cc[i%8]),alongX,d,line:alongX?streetsZ[i%streetsZ.length]:streetsX[i%streetsX.length],s:Math.random(),v:(.04+Math.random()*.04)})}
 const cclk=new THREE.Clock();
 (function cityLoop(){requestAnimationFrame(cityLoop);const t=cclk.getElapsedTime();
  const glow=Math.min(1,t/3)*(1.05+.08*Math.sin(t*.7));CITYMATS.forEach((m,i)=>m.emissiveIntensity=glow*(.9+.1*Math.sin(t*2+i)));
