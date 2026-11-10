@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>BrightMinds Credit</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:#0f172a;color:#e2e8f0}
+#menuBtn{position:fixed;top:12px;left:12px;z-index:20;background:#f59e0b;border:0;border-radius:10px;padding:10px 14px;font-size:20px;cursor:pointer}
+nav{position:fixed;top:0;left:0;height:100%;width:250px;background:#111827;padding:64px 12px 12px;transform:translateX(-100%);transition:.25s;z-index:15;overflow:auto}
+nav.open{transform:none}nav button{display:block;width:100%;text-align:left;background:none;border:0;color:#e2e8f0;padding:11px;border-radius:8px;font-size:15px;cursor:pointer}nav button:hover,nav button.act{background:#1f2937;color:#fbbf24}
+header{padding:14px 14px 14px 76px;background:#1e293b;display:flex;justify-content:space-between;align-items:center}header h1{margin:0;font-size:20px;color:#fbbf24}
+main{padding:16px;max-width:1100px;margin:auto}section{display:none}section.show{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.card{background:#1e293b;border-radius:12px;padding:14px;margin-bottom:12px}
+.big{font-size:26px;font-weight:700;color:#fbbf24}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:7px;border-bottom:1px solid #334155;text-align:left}
+input,select{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:8px;padding:8px;margin:3px}.btn{background:#f59e0b;color:#111;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;margin:3px}
+.tag{padding:2px 8px;border-radius:10px;font-size:12px}.ok{background:#065f46}.warn{background:#92400e}.bad{background:#7f1d1d}
+.alert{border-left:4px solid #f59e0b}.ai{border-left:4px solid #a78bfa}
+#lock{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+#toast{position:fixed;top:14px;right:14px;background:#334155;padding:12px;border-radius:10px;display:none;z-index:60;max-width:300px}
+</style></head><body>
+<button id="menuBtn" onclick="nav.classList.toggle('open')">☰</button>
+<nav id="nav"></nav>
+<header><h1>BrightMinds Credit</h1><span id="net" class="tag ok">Online</span></header>
+<main>
+<section id="dash"><div class="grid">
+<div class="card"><div>AI credit score</div><div class="big" id="score"></div></div>
+<div class="card"><div>Outstanding balance</div><div class="big" id="bal"></div></div>
+<div class="card"><div>Interest rate</div><div class="big" id="rate"></div><small>Reviewed monthly</small></div>
+<div class="card"><div>Next payment</div><div class="big" id="next"></div></div></div>
+<div class="card alert"><h3>Upcoming bill & interest alerts</h3><div id="alerts"></div></div></section>
+<section id="credit"><div class="card"><h3>AI-powered credit scoring</h3>
+Monthly income (USD) <input id="inc" type="number" value="600"> Existing debt <input id="debt" type="number" value="150"> On-time payments % <input id="ontime" type="number" value="90">
+<button class="btn" onclick="scoreCalc()">Score</button><p id="scoreOut"></p></div>
+<div class="card"><h3>Document upload & KYC</h3>ID document <input type="file" id="kyc1"> Proof of residence <input type="file" id="kyc2"> <button class="btn" onclick="kyc()">Verify</button><p id="kycOut"></p></div>
+<div class="card"><h3>Payment schedule & contract</h3><table id="sched"></table></div></section>
+<section id="pay"><div class="card"><h3>Make a payment</h3>
+Amount <input id="amt" type="number" value="45"> <select id="pcur"><option>USD</option><option>ZiG</option></select>
+<select id="meth"><option>EcoCash STK Push</option><option>Paynow</option><option>ContiPay</option><option>App-to-App</option></select>
+Phone <input id="ph" value="077 123 4567"><button class="btn" onclick="pay()">Pay</button><p id="payOut"></p></div>
+<div class="card"><h3>Webhook log</h3><table id="hooks"></table></div></section>
+<section id="inv"><div class="card"><h3>Add product</h3>
+<button class="btn" onclick="scanQR()">📷 Scan QR</button> or Name <input id="pn" placeholder="e.g. Samsung A15"> Barcode <input id="pb"> Qty <input id="pq" type="number" value="5" style="width:70px"> Price USD <input id="pp" type="number" value="120" style="width:90px">
+<button class="btn" onclick="addProd()">Add (auto-tag)</button></div>
+<div class="card"><h3>Centralized ledger <small>(fiscalized)</small></h3><table id="prods"></table></div>
+<div class="card"><h3>Sales & delivery stock check</h3><select id="saleP"></select> Qty <input id="sq" type="number" value="1" style="width:70px"><button class="btn" onclick="sale()">Record sale</button> <button class="btn" onclick="verify()">AI delivery stock verification</button><p id="verOut"></p></div></section>
+<section id="agents"><div class="card ai"><h3>🤖 AI inventory agents</h3><p>Theft Watch · Restock Advisor · Ledger Auditor</p><button class="btn" onclick="runAgents()">Run agents now</button><div id="agentOut"></div></div></section>
+<section id="fx"><div class="card"><h3>USD / ZiG exchange</h3><p>Rate: 1 USD = <b id="fxr"></b> ZiG <small>(demo rate)</small></p>
+<input id="fxa" type="number" value="100"> <select id="fxd"><option value="u">USD → ZiG</option><option value="z">ZiG → USD</option></select><button class="btn" onclick="fx()">Convert</button><p class="big" id="fxo"></p></div></section>
+<section id="del"><div class="card"><h3>Delivery tracking</h3><table id="dels"></table></div>
+<div class="card"><h3>Bulk courier routing</h3><button class="btn" onclick="route()">Optimise routes</button><div id="routeOut"></div></div>
+<div class="card"><h3>Courier signature & verification</h3><select id="sigD"></select><br><canvas id="sig" width="300" height="110" style="background:#fff;border-radius:8px;touch-action:none"></canvas><br><button class="btn" onclick="sign()">Confirm delivery</button><button class="btn" onclick="clearSig()">Clear</button></div></section>
+<section id="device"><div class="card"><h3>Android features (simulated)</h3>
+<p><button class="btn" onclick="bio()">🔐 Biometric unlock</button> <span id="bioOut"></span></p>
+<p><button class="btn" onclick="push()">🔔 Firebase push: payment reminder</button></p>
+<p><button class="btn" onclick="toggleNet()">📶 Toggle offline mode</button> Offline cache keeps schedules, contracts and deliveries viewable.</p>
+<p><button class="btn" style="background:#ef4444" onclick="lockPhone()">🔒 Server flags overdue → MDM lock</button></p></div></section>
+</main>
+<div id="lock"><h2>🔒 Device locked</h2><p>Your BrightMinds Credit payment is overdue.</p><button class="btn" onclick="unlockPay()">Pay now with EcoCash</button><button class="btn" style="background:#ef4444" onclick="alert('Dialling emergency services')">Emergency call</button></div>
+<div id="toast"></div>
+<script>
+const S=JSON.parse(localStorage.bmc||'null')||{bal:540,rate:18.5,score:712,fxr:26.8,kyc:false,prods:[{n:'Samsung A15',b:'600123',c:'Phones',q:12,p:150,sold:3},{n:'Tecno Spark 20',b:'600124',c:'Phones',q:2,p:110,sold:9},{n:'USB-C Charger',b:'700201',c:'Accessories',q:40,p:8,sold:5}],hooks:[],dels:[{id:'D-1001',to:'Harare CBD',s:'In transit'},{id:'D-1002',to:'Chitungwiza',s:'Dispatched'},{id:'D-1003',to:'Bulawayo',s:'Pending'}],txs:[22,25,24,240,23],exp:{}};
+const save=()=>localStorage.bmc=JSON.stringify(S),$=id=>document.getElementById(id);
+const secs=[['dash','🏠 Dashboard'],['credit','📊 Credit & KYC'],['pay','💳 Payments'],['inv','📦 Inventory'],['agents','🤖 AI Agents'],['fx','💱 USD/ZiG'],['del','🚚 Deliveries'],['device','📱 Device']];
+nav.innerHTML=secs.map(s=>`<button onclick="go('${s[0]}')" id="n_${s[0]}">${s[1]}</button>`).join('');
+function go(id){document.querySelectorAll('section').forEach(x=>x.classList.toggle('show',x.id==id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.id=='n_'+id));nav.classList.remove('open');render()}
+function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3500)}
+const day=n=>{let d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString()};
+const tag=n=>{n=n.toLowerCase();return /phone|samsung|tecno|itel|iphone|redmi|infinix/.test(n)?'Phones':/charger|cable|case|earph|usb/.test(n)?'Accessories':/tv|fridge|radio|speaker/.test(n)?'Electronics':/solar|battery|inverter/.test(n)?'Energy':'General'};
+function scoreCalc(){let i=+$('inc').value,d=+$('debt').value,o=+$('ontime').value;S.score=Math.round(Math.min(850,Math.max(300,300+o*3.5+(1-d/Math.max(i,1))*250)));S.rate=+(28-(S.score-300)/50).toFixed(1);$('scoreOut').textContent=`AI score ${S.score}. Suggested limit $${Math.round(i*0.4*(S.score/850)*12)} at ${S.rate}% p.a.`;save();render()}
+function kyc(){if(!$('kyc1').files.length||!$('kyc2').files.length){$('kycOut').textContent='Upload both documents.';return}$('kycOut').textContent='AI checking documents…';setTimeout(()=>{S.kyc=true;save();$('kycOut').textContent='✅ KYC verified.';render()},1200)}
+</script>
+<script>
+function pay(){let a=+$('amt').value,usd=$('pcur').value=='ZiG'?a/S.fxr:a,m=$('meth').value;$('payOut').textContent=m.startsWith('EcoCash')?`📲 STK prompt sent to ${$('ph').value}. Enter your EcoCash PIN…`:`Redirecting to ${m}…`;setTimeout(()=>{S.bal=Math.max(0,+(S.bal-usd).toFixed(2));S.hooks.unshift({t:new Date().toLocaleTimeString(),m,a:a+' '+$('pcur').value,s:'PAID'});S.txs.push(+usd.toFixed(2));save();$('payOut').textContent='✅ Payment confirmed via webhook.';render()},1500)}
+function scanQR(){const p=[['Itel A70','610555',85],['Solar Power Bank','720330',35],['Bluetooth Speaker','730441',40]][Math.floor(Math.random()*3)];$('pn').value=p[0];$('pb').value=p[1];$('pp').value=p[2];toast('QR scanned: '+p[0])}
+function addProd(){let n=$('pn').value.trim();if(!n)return toast('Enter a product name');S.prods.push({n,b:$('pb').value||String(Date.now()).slice(-6),c:tag(n),q:+$('pq').value,p:+$('pp').value,sold:0});save();toast(`Added ${n}, auto-tagged "${tag(n)}"`);$('pn').value=$('pb').value='';render()}
+function sale(){let p=S.prods[$('saleP').value],q=+$('sq').value;if(q>p.q)return toast('Not enough stock');p.q-=q;p.sold+=q;S.txs.push(p.p*q);save();toast('Sale recorded, fiscal receipt FR-'+Date.now().toString().slice(-6));render()}
+function verify(){let p=S.prods[$('saleP').value],c=p.q-(Math.random()<.4?1:0);S.exp[p.n]=p.q-c;save();$('verOut').innerHTML=c==p.q?`✅ ${p.n}: counted ${c}, ledger ${p.q}. Match.`:`⚠️ ${p.n}: counted ${c}, ledger ${p.q}. 1 unit missing, flagged to Theft Watch.`}
+function runAgents(){let o=[];S.prods.forEach(p=>{if(S.exp[p.n])o.push(`🕵️ <b>Theft Watch</b>: ${p.n} is ${S.exp[p.n]} unit(s) short after delivery check.`);if(p.q<=3||p.sold>p.q*2)o.push(`📦 <b>Restock Advisor</b>: order ${Math.max(10,p.sold*2)} × ${p.n} (stock ${p.q}, sold ${p.sold}).`)});let avg=S.txs.reduce((a,b)=>a+b,0)/S.txs.length;S.txs.forEach((t,i)=>{if(t>avg*2.5)o.push(`🚩 <b>Ledger Auditor</b>: transaction #${i+1} ($${t}) is ${Math.round(t/avg)}× the average.`)});$('agentOut').innerHTML=(o.length?o:['✅ No issues found.']).map(x=>`<p>${x}</p>`).join('')}
+function fx(){let a=+$('fxa').value;$('fxo').textContent=$('fxd').value=='u'?(a*S.fxr).toFixed(2)+' ZiG':'$'+(a/S.fxr).toFixed(2)}
+</script>
+<script>
+function route(){let d=S.dels.filter(x=>x.s!='Delivered');$('routeOut').innerHTML=`<p>Courier A: ${d.filter(x=>x.to!='Bulawayo').map(x=>x.id+' '+x.to).join(' → ')||'none'}</p><p>Courier B: ${d.filter(x=>x.to=='Bulawayo').map(x=>x.id+' '+x.to).join(' → ')||'none'}</p>`;d.forEach(x=>{if(x.s=='Pending')x.s='Dispatched'});save();render()}
+const cv=$('sig'),cx=cv.getContext('2d');let dr=0,signed=0;cv.onpointerdown=e=>{dr=1;cx.beginPath();cx.moveTo(e.offsetX,e.offsetY)};cv.onpointermove=e=>{if(dr){cx.lineTo(e.offsetX,e.offsetY);cx.stroke();signed=1}};onpointerup=()=>dr=0;
+function clearSig(){cx.clearRect(0,0,300,110);signed=0}
+function sign(){if(!signed)return toast('Signature required');let d=S.dels.find(x=>x.id==$('sigD').value);if(!d)return;d.s='Delivered';save();clearSig();toast(d.id+' verified and delivered');render()}
+function bio(){$('bioOut').textContent='Scanning fingerprint…';setTimeout(()=>$('bioOut').textContent='✅ Unlocked',900)}
+function push(){toast(`🔔 BrightMinds: $45 due ${day(3)}. Interest ${S.rate}% applies after the due date.`)}
+function toggleNet(){let n=$('net'),off=n.textContent=='Online';n.textContent=off?'Offline (cached)':'Online';n.className='tag '+(off?'warn':'ok')}
+function lockPhone(){$('lock').style.display='flex'}
+function unlockPay(){S.bal=Math.max(0,S.bal-45);S.hooks.unshift({t:new Date().toLocaleTimeString(),m:'EcoCash STK Push',a:'45 USD',s:'PAID'});save();$('lock').style.display='none';toast('Payment received, device unlocked');render()}
+</script>
+<script>
+function render(){$('score').textContent=S.score;$('bal').textContent='$'+S.bal.toFixed(2);$('rate').textContent=S.rate+'%';$('next').textContent='$45 · '+day(3);$('fxr').textContent=S.fxr;
+$('alerts').innerHTML=`<p>💡 Instalment of $45 due ${day(3)}</p><p>📈 Interest rate ${S.rate}% p.a.; late payments add a 2% penalty</p><p>📱 Airtime bundle renews ${day(6)}</p>${S.kyc?'':'<p>🪪 KYC not completed: go to Credit & KYC</p>'}`;
+let r='<tr><th>Due</th><th>Amount</th><th>Status</th></tr>';for(let i=0;i<6;i++)r+=`<tr><td>${day(3+30*i)}</td><td>$45.00</td><td><span class="tag ${i?'warn':'bad'}">${i?'Upcoming':'Due soon'}</span></td></tr>`;$('sched').innerHTML=r;
+$('hooks').innerHTML='<tr><th>Time</th><th>Method</th><th>Amount</th><th>Status</th></tr>'+S.hooks.map(h=>`<tr><td>${h.t}</td><td>${h.m}</td><td>${h.a}</td><td><span class="tag ok">${h.s}</span></td></tr>`).join('');
+$('prods').innerHTML='<tr><th>Product</th><th>Barcode</th><th>Category</th><th>Stock</th><th>Price</th><th>Sold</th></tr>'+S.prods.map(p=>`<tr><td>${p.n}</td><td>${p.b}</td><td>${p.c}</td><td><span class="tag ${p.q<=3?'bad':'ok'}">${p.q}</span></td><td>$${p.p}</td><td>${p.sold}</td></tr>`).join('');
+$('saleP').innerHTML=S.prods.map((p,i)=>`<option value="${i}">${p.n}</option>`).join('');
+$('dels').innerHTML='<tr><th>ID</th><th>To</th><th>Status</th></tr>'+S.dels.map(d=>`<tr><td>${d.id}</td><td>${d.to}</td><td><span class="tag ${d.s=='Delivered'?'ok':'warn'}">${d.s}</span></td></tr>`).join('');
+$('sigD').innerHTML=S.dels.filter(d=>d.s!='Delivered').map(d=>`<option>${d.id}</option>`).join('')}
+setInterval(()=>{if(Math.random()<.5)S.fxr=+(S.fxr+(Math.random()-.5)*.1).toFixed(2);$('fxr').textContent=S.fxr},5000);
+go('dash');setTimeout(push,2500);
+</script></body></html>
