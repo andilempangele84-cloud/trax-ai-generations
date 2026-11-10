@@ -13,11 +13,11 @@ input,select{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-ra
 .alert{border-left:4px solid #f59e0b}.ai{border-left:4px solid #a78bfa}
 #lock{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
 #toast{position:fixed;top:14px;right:14px;background:#334155;padding:12px;border-radius:10px;display:none;z-index:60;max-width:300px}
-#login{position:fixed;inset:0;background:#0f172a;z-index:70;display:flex;align-items:center;justify-content:center}#login .card{width:320px;max-width:92%}#login input{width:calc(100% - 22px)}.steps span{display:inline-block;padding:3px 9px;border-radius:10px;background:#334155;margin:2px;font-size:12px}.steps span.on{background:#f59e0b;color:#111}
+.steps span{display:inline-block;padding:3px 9px;border-radius:10px;background:#334155;margin:2px;font-size:12px}.steps span.on{background:#f59e0b;color:#111}
 </style></head><body>
 <button id="menuBtn" onclick="nav.classList.toggle('open')">☰</button>
 <nav id="nav"></nav>
-<header><h1>BrightMinds Credit</h1><span><span id="who" class="tag ok"></span> <span id="net" class="tag ok">Online</span> <button class="btn" onclick="logout()">Log out</button></span></header>
+<header><h1>BrightMinds Credit</h1><span><span id="net" class="tag ok">Online</span></span></header>
 <main>
 <section id="dash"><div class="grid">
 <div class="card"><div>Outstanding balance</div><div class="big" id="bal"></div></div>
@@ -54,10 +54,7 @@ Phone <input id="ph" value="077 123 4567"><button class="btn" onclick="pay()">Pa
 <p><button class="btn" style="background:#ef4444" onclick="lockPhone()">🔒 Server flags overdue → MDM lock</button></p></div></section>
 </main>
 <div id="lock"><h2>🔒 Device locked</h2><p>Your BrightMinds Credit payment is overdue.</p><button class="btn" onclick="unlockPay()">Pay now with EcoCash</button><button class="btn" style="background:#ef4444" onclick="alert('Dialling emergency services')">Emergency call</button></div>
-<div id="login"><div class="card"><h2 style="color:#fbbf24;margin-top:0">BrightMinds Credit</h2><p>Sales agent login</p>
-<input id="lid" placeholder="Agent ID (e.g. SA001)"><input id="lpin" type="password" placeholder="PIN" maxlength="6">
-<button class="btn" style="width:100%" onclick="login()">Log in</button><button class="btn" style="width:100%;background:#334155;color:#e2e8f0" onclick="bioLogin()">👆 Log in with fingerprint</button>
-<p id="lerr" style="color:#f87171"></p><small>Demo agents: SA001 / 1234 (Tendai Moyo) · SA002 / 5678 (Rudo Chikore)</small></div></div>
+
 <div id="toast"></div>
 <script>
 const S=JSON.parse(localStorage.bmc||'null')||{bal:540,rate:18.5,score:712,fxr:26.8,kyc:false,prods:[{n:'Samsung A15',b:'600123',c:'Phones',q:12,p:150,sold:3},{n:'Tecno Spark 20',b:'600124',c:'Phones',q:2,p:110,sold:9},{n:'USB-C Charger',b:'700201',c:'Accessories',q:40,p:8,sold:5}],hooks:[],dels:[{id:'D-1001',to:'Harare CBD',s:'In transit'},{id:'D-1002',to:'Chitungwiza',s:'Dispatched'},{id:'D-1003',to:'Bulawayo',s:'Pending'}],txs:[22,25,24,240,23],exp:{}};
@@ -68,7 +65,7 @@ function go(id){document.querySelectorAll('section').forEach(x=>x.classList.togg
 function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3500)}
 const day=n=>{let d=new Date();d.setDate(d.getDate()+n);return d.toLocaleDateString()};
 const tag=n=>{n=n.toLowerCase();return /phone|samsung|tecno|itel|iphone|redmi|infinix/.test(n)?'Phones':/charger|cable|case|earph|usb/.test(n)?'Accessories':/tv|fridge|radio|speaker/.test(n)?'Electronics':/solar|battery|inverter/.test(n)?'Energy':'General'};
-function quickApp(){const g=k=>$(k).value.trim(),need=[['qName','name'],['qNid','ID'],['qPhone','phone'],['qInc','income']].filter(x=>!g(x[0])).map(x=>x[1]);if(need.length){$('qOut').textContent='Please fill in: '+need.join(', ');return}if(!$('qOk').checked){$('qOut').textContent='The customer must accept the terms.';return}S.apps=S.apps||[];const id='APP-'+(1001+S.apps.length);S.apps.unshift({id,name:g('qName'),nid:g('qNid'),phone:g('qPhone'),email:g('qEmail'),addr:g('qAddr'),emp:g('qEmp'),inc:g('qInc'),prod:g('qProd'),term:g('qTerm'),status:'Pending review',agent:S.agent,date:new Date().toLocaleDateString()});save();['qName','qNid','qPhone','qEmail','qAddr','qEmp','qInc'].forEach(k=>$(k).value='');$('qOk').checked=false;$('qOut').textContent='✅ '+id+' submitted. See it under Applications.';renderApps()}
+function quickApp(){const g=k=>$(k).value.trim(),need=[['qName','name'],['qNid','ID'],['qPhone','phone'],['qInc','income']].filter(x=>!g(x[0])).map(x=>x[1]);if(need.length){$('qOut').textContent='Please fill in: '+need.join(', ');return}if(!$('qOk').checked){$('qOut').textContent='The customer must accept the terms.';return}S.apps=S.apps||[];const id='APP-'+(1001+S.apps.length);S.apps.unshift({id,name:g('qName'),nid:g('qNid'),phone:g('qPhone'),email:g('qEmail'),addr:g('qAddr'),emp:g('qEmp'),inc:g('qInc'),prod:g('qProd'),term:g('qTerm'),status:'Pending review',agent:'Sales agent',date:new Date().toLocaleDateString()});save();['qName','qNid','qPhone','qEmail','qAddr','qEmp','qInc'].forEach(k=>$(k).value='');$('qOk').checked=false;$('qOut').textContent='✅ '+id+' submitted. See it under Applications.';renderApps()}
 function scoreCalc_unused(){let i=+$('inc').value,d=+$('debt').value,o=+$('ontime').value;S.score=Math.round(Math.min(850,Math.max(300,300+o*3.5+(1-d/Math.max(i,1))*250)));S.rate=+(28-(S.score-300)/50).toFixed(1);$('scoreOut').textContent=`AI score ${S.score}. Suggested limit $${Math.round(i*0.4*(S.score/850)*12)} at ${S.rate}% p.a.`;save();render()}
 function kyc(){if(!$('kyc1').files.length||!$('kyc2').files.length){$('kycOut').textContent='Upload both documents.';return}$('kycOut').textContent='AI checking documents…';setTimeout(()=>{S.kyc=true;save();$('kycOut').textContent='✅ KYC verified.';render()},1200)}
 </script>
@@ -106,10 +103,6 @@ go('dash');setTimeout(push,2500);
 
 const AGENTS={SA001:{pin:'1234',n:'Tendai Moyo'},SA002:{pin:'5678',n:'Rudo Chikore'}};
 S.apps=S.apps||[];let A={},step=0;
-function startSession(id){S.agent=id;save();$('login').style.display='none';$('who').textContent='👤 '+AGENTS[id].n+' ('+id+')';go('dash')}
-function login(){const id=$('lid').value.trim().toUpperCase(),a=AGENTS[id];if(a&&a.pin==$('lpin').value)startSession(id);else $('lerr').textContent='Wrong agent ID or PIN'}
-function bioLogin(){const id=$('lid').value.trim().toUpperCase();if(!AGENTS[id]){$('lerr').textContent='Enter your Agent ID first';return}$('lerr').textContent='Scanning fingerprint…';setTimeout(()=>startSession(id),1200)}
-function logout(){delete S.agent;save();$('lpin').value='';$('lerr').textContent='';$('login').style.display='flex'}
 const ST=['Personal','Income','Documents','Product','Review'];
 function f(k,l,t='text'){return `<label>${l}<br><input type="${t}" value="${A[k]||''}" oninput="A['${k}']=this.value"></label><br>`}
 function renderApp(){$('steps').innerHTML=ST.map((s,i)=>`<span class="${i==step?'on':''}">${i+1}. ${s}</span>`).join('');let b='';
@@ -121,8 +114,8 @@ if(step==4){A.prod=A.prod||S.prods[0].n;A.term=A.term||3;const r=assess();b=`<p>
 const nav2=`<br>${step?'<button class="btn" onclick="step--;renderApp()">Back</button>':''}${step<4?'<button class="btn" onclick="nextStep()">Next</button>':'<button class="btn" onclick="submitApp()">Submit application</button>'}`;$('appForm').innerHTML=b+nav2}
 function nextStep(){const need=[['name','nid','phone'],['inc'],[],[],[]][step].filter(k=>!A[k]);if(need.length){toast('Please fill in: '+need.join(', '));return}if(step==3&&!A.mdm){toast('Customer must accept the device-lock terms');return}step++;renderApp()}
 function assess(){const inc=+A.inc||0,ex=+A.exp||0,p=S.prods.find(x=>x.n==A.prod)||S.prods[0],inst=p.p*1.185/(+A.term||3),docs=[A.idDoc,A.por,A.pay].filter(Boolean).length,free=inc-ex;let s=Math.round(Math.max(300,Math.min(850,450+free*0.8+docs*40-inst*1.5)));const dec=s>=650&&docs>=2?'Pre-approved':s>=550?'Needs review':'Declined';return{score:s,dec,cls:dec=='Pre-approved'?'ok':dec=='Needs review'?'warn':'bad',why:`Instalment ≈ $${inst.toFixed(2)}/month vs spare income $${free}. ${docs}/3 KYC documents.`}}
-function submitApp(){const r=assess();S.apps.unshift({id:'APP-'+(1001+S.apps.length),...A,score:r.score,status:r.dec,agent:S.agent,date:new Date().toLocaleDateString()});save();A={};step=0;toast('Application submitted');renderApp();renderApps()}
+function submitApp(){const r=assess();S.apps.unshift({id:'APP-'+(1001+S.apps.length),...A,score:r.score,status:r.dec,agent:'Sales agent',date:new Date().toLocaleDateString()});save();A={};step=0;toast('Application submitted');renderApp();renderApps()}
 function setApp(i,s){S.apps[i].status=s;save();renderApps();toast(S.apps[i].id+': '+s)}
 function renderApps(){$('appList').innerHTML='<tr><th>ID</th><th>Customer</th><th>Product</th><th>Term</th><th>Status</th><th>Agent</th><th></th></tr>'+S.apps.map((a,i)=>`<tr><td>${a.id}</td><td>${a.name}</td><td>${a.prod}</td><td>${a.term||'—'} mo</td><td><span class="tag ${/appr/i.test(a.status)?'ok':/Decl|Rej/.test(a.status)?'bad':'warn'}">${a.status}</span></td><td>${a.agent}</td><td><button class="btn" onclick="setApp(${i},'Approved')">✓</button><button class="btn" onclick="setApp(${i},'Rejected')">✗</button></td></tr>`).join('')}
-renderApp();renderApps();if(S.agent&&AGENTS[S.agent])startSession(S.agent);
+renderApp();renderApps();
 </script></body></html>
