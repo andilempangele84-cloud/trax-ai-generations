@@ -13,10 +13,11 @@ input,select{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-ra
 .alert{border-left:4px solid #f59e0b}.ai{border-left:4px solid #a78bfa}
 #lock{position:fixed;inset:0;background:#000;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
 #toast{position:fixed;top:14px;right:14px;background:#334155;padding:12px;border-radius:10px;display:none;z-index:60;max-width:300px}
+#login{position:fixed;inset:0;background:#0f172a;z-index:70;display:flex;align-items:center;justify-content:center}#login .card{width:320px;max-width:92%}#login input{width:calc(100% - 22px)}.steps span{display:inline-block;padding:3px 9px;border-radius:10px;background:#334155;margin:2px;font-size:12px}.steps span.on{background:#f59e0b;color:#111}
 </style></head><body>
 <button id="menuBtn" onclick="nav.classList.toggle('open')">☰</button>
 <nav id="nav"></nav>
-<header><h1>BrightMinds Credit</h1><span id="net" class="tag ok">Online</span></header>
+<header><h1>BrightMinds Credit</h1><span><span id="who" class="tag ok"></span> <span id="net" class="tag ok">Online</span> <button class="btn" onclick="logout()">Log out</button></span></header>
 <main>
 <section id="dash"><div class="grid">
 <div class="card"><div>AI credit score</div><div class="big" id="score"></div></div>
@@ -45,6 +46,8 @@ Phone <input id="ph" value="077 123 4567"><button class="btn" onclick="pay()">Pa
 <section id="del"><div class="card"><h3>Delivery tracking</h3><table id="dels"></table></div>
 <div class="card"><h3>Bulk courier routing</h3><button class="btn" onclick="route()">Optimise routes</button><div id="routeOut"></div></div>
 <div class="card"><h3>Courier signature & verification</h3><select id="sigD"></select><br><canvas id="sig" width="300" height="110" style="background:#fff;border-radius:8px;touch-action:none"></canvas><br><button class="btn" onclick="sign()">Confirm delivery</button><button class="btn" onclick="clearSig()">Clear</button></div></section>
+<section id="apps"><div class="card"><h3>📝 New customer application</h3><div class="steps" id="steps"></div><div id="appForm"></div></div>
+<div class="card"><h3>Applications</h3><table id="appList"></table></div></section>
 <section id="device"><div class="card"><h3>Android features (simulated)</h3>
 <p><button class="btn" onclick="bio()">🔐 Biometric unlock</button> <span id="bioOut"></span></p>
 <p><button class="btn" onclick="push()">🔔 Firebase push: payment reminder</button></p>
@@ -52,11 +55,15 @@ Phone <input id="ph" value="077 123 4567"><button class="btn" onclick="pay()">Pa
 <p><button class="btn" style="background:#ef4444" onclick="lockPhone()">🔒 Server flags overdue → MDM lock</button></p></div></section>
 </main>
 <div id="lock"><h2>🔒 Device locked</h2><p>Your BrightMinds Credit payment is overdue.</p><button class="btn" onclick="unlockPay()">Pay now with EcoCash</button><button class="btn" style="background:#ef4444" onclick="alert('Dialling emergency services')">Emergency call</button></div>
+<div id="login"><div class="card"><h2 style="color:#fbbf24;margin-top:0">BrightMinds Credit</h2><p>Sales agent login</p>
+<input id="lid" placeholder="Agent ID (e.g. SA001)"><input id="lpin" type="password" placeholder="PIN" maxlength="6">
+<button class="btn" style="width:100%" onclick="login()">Log in</button><button class="btn" style="width:100%;background:#334155;color:#e2e8f0" onclick="bioLogin()">👆 Log in with fingerprint</button>
+<p id="lerr" style="color:#f87171"></p><small>Demo agents: SA001 / 1234 (Tendai Moyo) · SA002 / 5678 (Rudo Chikore)</small></div></div>
 <div id="toast"></div>
 <script>
 const S=JSON.parse(localStorage.bmc||'null')||{bal:540,rate:18.5,score:712,fxr:26.8,kyc:false,prods:[{n:'Samsung A15',b:'600123',c:'Phones',q:12,p:150,sold:3},{n:'Tecno Spark 20',b:'600124',c:'Phones',q:2,p:110,sold:9},{n:'USB-C Charger',b:'700201',c:'Accessories',q:40,p:8,sold:5}],hooks:[],dels:[{id:'D-1001',to:'Harare CBD',s:'In transit'},{id:'D-1002',to:'Chitungwiza',s:'Dispatched'},{id:'D-1003',to:'Bulawayo',s:'Pending'}],txs:[22,25,24,240,23],exp:{}};
 const save=()=>localStorage.bmc=JSON.stringify(S),$=id=>document.getElementById(id);
-const secs=[['dash','🏠 Dashboard'],['credit','📊 Credit & KYC'],['pay','💳 Payments'],['inv','📦 Inventory'],['agents','🤖 AI Agents'],['fx','💱 USD/ZiG'],['del','🚚 Deliveries'],['device','📱 Device']];
+const secs=[['dash','🏠 Dashboard'],['credit','📊 Credit & KYC'],['pay','💳 Payments'],['inv','📦 Inventory'],['agents','🤖 AI Agents'],['fx','💱 USD/ZiG'],['del','🚚 Deliveries'],['apps','📝 Applications'],['device','📱 Device']];
 nav.innerHTML=secs.map(s=>`<button onclick="go('${s[0]}')" id="n_${s[0]}">${s[1]}</button>`).join('');
 function go(id){document.querySelectorAll('section').forEach(x=>x.classList.toggle('show',x.id==id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.id=='n_'+id));nav.classList.remove('open');render()}
 function toast(t){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',3500)}
@@ -96,4 +103,26 @@ $('dels').innerHTML='<tr><th>ID</th><th>To</th><th>Status</th></tr>'+S.dels.map(
 $('sigD').innerHTML=S.dels.filter(d=>d.s!='Delivered').map(d=>`<option>${d.id}</option>`).join('')}
 setInterval(()=>{if(Math.random()<.5)S.fxr=+(S.fxr+(Math.random()-.5)*.1).toFixed(2);$('fxr').textContent=S.fxr},5000);
 go('dash');setTimeout(push,2500);
+
+const AGENTS={SA001:{pin:'1234',n:'Tendai Moyo'},SA002:{pin:'5678',n:'Rudo Chikore'}};
+S.apps=S.apps||[];let A={},step=0;
+function startSession(id){S.agent=id;save();$('login').style.display='none';$('who').textContent='👤 '+AGENTS[id].n+' ('+id+')';go('dash')}
+function login(){const id=$('lid').value.trim().toUpperCase(),a=AGENTS[id];if(a&&a.pin==$('lpin').value)startSession(id);else $('lerr').textContent='Wrong agent ID or PIN'}
+function bioLogin(){const id=$('lid').value.trim().toUpperCase();if(!AGENTS[id]){$('lerr').textContent='Enter your Agent ID first';return}$('lerr').textContent='Scanning fingerprint…';setTimeout(()=>startSession(id),1200)}
+function logout(){delete S.agent;save();$('lpin').value='';$('lerr').textContent='';$('login').style.display='flex'}
+const ST=['Personal','Income','Documents','Product','Review'];
+function f(k,l,t='text'){return `<label>${l}<br><input type="${t}" value="${A[k]||''}" oninput="A['${k}']=this.value"></label><br>`}
+function renderApp(){$('steps').innerHTML=ST.map((s,i)=>`<span class="${i==step?'on':''}">${i+1}. ${s}</span>`).join('');let b='';
+if(step==0)b=f('name','Full name')+f('nid','National ID number')+f('phone','Phone (EcoCash)','tel')+f('addr','Address');
+if(step==1)b=f('emp','Employer / business')+f('inc','Monthly income (USD)','number')+f('exp','Monthly expenses (USD)','number');
+if(step==2)b=`<label>ID document <input type="file" onchange="A.idDoc=this.files[0]?.name"></label><br><label>Proof of residence <input type="file" onchange="A.por=this.files[0]?.name"></label><br><label>Payslip / bank statement <input type="file" onchange="A.pay=this.files[0]?.name"></label><br><small>Files stay on this device (demo KYC check).</small>`;
+if(step==3)b=`<label>Product<br><select onchange="A.prod=this.value">${S.prods.map(p=>`<option ${A.prod==p.n?'selected':''}>${p.n}</option>`).join('')}</select></label><br><label>Term<br><select onchange="A.term=this.value">${[3,6,12].map(m=>`<option ${A.term==m?'selected':''} value="${m}">${m} months</option>`).join('')}</select></label><br><label><input type="checkbox" ${A.mdm?'checked':''} onchange="A.mdm=this.checked"> Customer agrees to device lock if payments are overdue</label>`;
+if(step==4){A.prod=A.prod||S.prods[0].n;A.term=A.term||3;const r=assess();b=`<p><b>${A.name||'—'}</b> · ID ${A.nid||'—'} · ${A.phone||'—'}</p><p>Income $${A.inc||0} · Expenses $${A.exp||0}</p><p>Docs: ${[A.idDoc,A.por,A.pay].filter(Boolean).length}/3 uploaded</p><p>${A.prod} over ${A.term} months</p><div class="card ai">🤖 AI pre-assessment: score <b>${r.score}</b> — <span class="tag ${r.cls}">${r.dec}</span><br><small>${r.why}</small></div>`}
+const nav2=`<br>${step?'<button class="btn" onclick="step--;renderApp()">Back</button>':''}${step<4?'<button class="btn" onclick="nextStep()">Next</button>':'<button class="btn" onclick="submitApp()">Submit application</button>'}`;$('appForm').innerHTML=b+nav2}
+function nextStep(){const need=[['name','nid','phone'],['inc'],[],[],[]][step].filter(k=>!A[k]);if(need.length){toast('Please fill in: '+need.join(', '));return}if(step==3&&!A.mdm){toast('Customer must accept the device-lock terms');return}step++;renderApp()}
+function assess(){const inc=+A.inc||0,ex=+A.exp||0,p=S.prods.find(x=>x.n==A.prod)||S.prods[0],inst=p.p*1.185/(+A.term||3),docs=[A.idDoc,A.por,A.pay].filter(Boolean).length,free=inc-ex;let s=Math.round(Math.max(300,Math.min(850,450+free*0.8+docs*40-inst*1.5)));const dec=s>=650&&docs>=2?'Pre-approved':s>=550?'Needs review':'Declined';return{score:s,dec,cls:dec=='Pre-approved'?'ok':dec=='Needs review'?'warn':'bad',why:`Instalment ≈ $${inst.toFixed(2)}/month vs spare income $${free}. ${docs}/3 KYC documents.`}}
+function submitApp(){const r=assess();S.apps.unshift({id:'APP-'+(1001+S.apps.length),...A,score:r.score,status:r.dec,agent:S.agent,date:new Date().toLocaleDateString()});save();A={};step=0;toast('Application submitted');renderApp();renderApps()}
+function setApp(i,s){S.apps[i].status=s;save();renderApps();toast(S.apps[i].id+': '+s)}
+function renderApps(){$('appList').innerHTML='<tr><th>ID</th><th>Customer</th><th>Product</th><th>Score</th><th>Status</th><th>Agent</th><th></th></tr>'+S.apps.map((a,i)=>`<tr><td>${a.id}</td><td>${a.name}</td><td>${a.prod}</td><td>${a.score}</td><td><span class="tag ${/appr/i.test(a.status)?'ok':/Decl|Rej/.test(a.status)?'bad':'warn'}">${a.status}</span></td><td>${a.agent}</td><td><button class="btn" onclick="setApp(${i},'Approved')">✓</button><button class="btn" onclick="setApp(${i},'Rejected')">✗</button></td></tr>`).join('')}
+renderApp();renderApps();if(S.agent&&AGENTS[S.agent])startSession(S.agent);
 </script></body></html>
